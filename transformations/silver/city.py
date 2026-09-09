@@ -25,4 +25,3 @@ def city_silver():
     )
 
     return df_silver
-    
