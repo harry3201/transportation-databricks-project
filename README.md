@@ -68,3 +68,10 @@ Pipeline datasets are published to Unity Catalog under the `transportation` cata
 2. Validate with a dry run
 3. Commit and push changes
 4. Create a pull request for review
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/new-dataset`)
+3. Commit your changes with a descriptive message
+4. Push to your fork and submit a pull request
