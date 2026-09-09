@@ -10,7 +10,7 @@ A end-to-end **Medallion Architecture** data pipeline built on **Databricks Lake
 |---|---|
 | **Platform** | Databricks Lakehouse (Serverless compute, Photon engine) |
 | **Framework** | Lakeflow Spark Declarative Pipelines (Python + SQL) |
-| **Storage** | Delta Lake on AWS S3 (`s3://goodcabs-harrymugi32/data-store/`) |
+| **Storage** | Delta Lake on AWS S3 (`s3://<your-bucket>/data-store/`) |
 | **Catalog** | Unity Catalog — `transportation` |
 | **Pipeline mode** | Triggered (on-demand execution) |
 | **Data volume** | ~366K trip records across 10 cities, Aug–Dec 2025 |
@@ -127,8 +127,8 @@ parameters:
   end_date: 2025-12-31
 
 sources:
-  city:  s3://goodcabs-harrymugi32/data-store/city
-  trips: s3://goodcabs-harrymugi32/data-store/trips
+  city:  s3://<your-bucket>/data-store/city
+  trips: s3://<your-bucket>/data-store/trips
 ```
 
 ---
@@ -139,12 +139,25 @@ sources:
 
 - A Databricks workspace with Unity Catalog enabled
 - Serverless compute enabled
-- Read access to the S3 source bucket
+- Your own S3 bucket containing `city` and `trips` source data, with read access configured via a Unity Catalog storage credential / external location (or instance profile)
+
+### Configuring your own data source
+
+This repo does not include any data or bucket names — you'll need to point it at your own S3 location before running it:
+
+1. Create (or reuse) an S3 bucket and upload your source files under two prefixes, e.g. `data-store/city` and `data-store/trips`.
+2. In each bronze notebook/file (`transformations/bronze/city.py`, `transformations/bronze/trips.py`), replace the placeholder path with your actual bucket:
+   ```python
+   # replace this:
+   source_path = "s3://<your-bucket>/data-store/trips"
+   ```
+3. Make sure Unity Catalog has an **external location** (and underlying storage credential) granting the pipeline's run-as identity read access to that bucket/prefix.
+4. Update the `catalog` name in the pipeline settings if you don't want to use `transportation`.
 
 ### Running the pipeline
 
 1. Clone this repository into a Databricks Git folder (or attach it as a Lakeflow pipeline source).
-2. Configure the `transportation_pipeline` with the `start_date` / `end_date` parameters.
+2. Configure the `transportation_pipeline` with the `start_date` / `end_date` parameters and your S3 path(s) from above.
 3. Run a **dry run** to validate the DAG.
 4. Trigger a full pipeline update to materialize bronze → silver → gold.
 
